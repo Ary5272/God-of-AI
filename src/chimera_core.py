@@ -1,118 +1,105 @@
 # src/chimera_core.py
-# Foundational Python code for the Project Chimera architecture.
-# This script outlines the primary classes and their interactions.
+# Core classes updated to use a capability-based routing system.
 
 import time
 import threading
+import config
+from src.utils.logger import log
+
+# Import all module classes to allow for dynamic loading
+from src.modules import *
+
 
 class MetacognitiveLayer:
-    """
-    The 'overseer' AI. It monitors the entire system's performance,
-    optimizes module interaction, and can even commission new SCMs.
-    """
+    """The 'overseer' AI. It monitors the entire system's performance."""
     def __init__(self, chimera_instance):
-        print("[MetacognitiveLayer] Initialized. Overseeing system.")
+        log("MetacognitiveLayer", "Initialized. Overseeing system.")
         self.system = chimera_instance
-        self.performance_logs = []
         self.is_monitoring = True
         self.monitor_thread = threading.Thread(target=self.monitor_performance, daemon=True)
         self.monitor_thread.start()
 
     def monitor_performance(self):
         """Continuously monitors the system for efficiency and errors."""
+        interval = config.METACOGNITIVE_CONFIG['monitoring_interval_seconds']
         while self.is_monitoring:
-            # In a real implementation, this would be incredibly complex,
-            # analyzing data flow, resource usage, and task success rates.
-            time.sleep(10)
-            log_entry = f"Timestamp: {time.time()}, Active Modules: {len(self.system.modules)}"
-            self.performance_logs.append(log_entry)
-            # print(f"[MetacognitiveLayer] System status nominal. Log entry added.")
+            time.sleep(interval)
+            log("MetacognitiveLayer", f"System nominal. Active Modules: {len(self.system.modules)}. CRC Load: {self.system.core.current_load:.2f}%")
 
-    def reconfigure_architecture(self, task_description):
-        """Dynamically reallocates resources or suggests new modules."""
-        print(f"[MetacognitiveLayer] Reconfiguration triggered by task: '{task_description}'")
-        # Placeholder for logic that decides how to change the system.
-        # For now, it just suggests a new module type.
-        if "visual" in task_description.lower():
-            print("[MetacognitiveLayer] Suggestion: A specialized 'VisualPatternSCM' might improve performance.")
-        
+    def analyze_task_delegation(self, task_prompt, chosen_module):
+        """Analyzes the CRC's choice of module for a given task."""
+        log("MetacognitiveLayer", f"Analyzing CRC choice for task: '{task_prompt}' -> Chose '{chosen_module.name}'")
+        # In a real system, this would analyze if a better module existed or if a new one is needed.
+
+
 class CausalReasoningCore:
     """
-    The "Consciousness" of Chimera. It receives tasks, delegates them
-    to the appropriate modules, and synthesizes their outputs.
+    The "Consciousness" of Chimera. Now uses capability-based routing.
     """
     def __init__(self, chimera_instance):
-        print("[CausalReasoningCore] CRC online. Awaiting tasks.")
+        log("CausalReasoningCore", "CRC online. Awaiting tasks.")
         self.system = chimera_instance
+        self.current_load = 0.0
+
+    def find_best_module(self, task_keywords):
+        """Finds the best module for a task based on reported capabilities."""
+        best_module = None
+        highest_match_score = 0
+        log("CausalReasoningCore", f"Searching for module with capabilities matching: {task_keywords}")
+        
+        for module in self.system.modules.values():
+            capabilities = module.get_capabilities()
+            match_score = len(set(task_keywords) & set(capabilities))
+            
+            if match_score > highest_match_score:
+                highest_match_score = match_score
+                best_module = module
+        
+        return best_module
 
     def process_task(self, task_prompt):
         """
         Analyzes a task and determines the correct SCMs to use.
         """
-        print(f"\n[CausalReasoningCore] Received new task: '{task_prompt}'")
+        log("CausalReasoningCore", f"Received new task: '{task_prompt}'", header=True)
+        self.current_load = 100.0
         
-        # Notify the Metacognitive Layer to observe and potentially reconfigure.
-        self.system.metacognitive_layer.reconfigure_architecture(task_prompt)
-        
-        # --- Task Delegation Logic (Simplified) ---
-        # In a real system, this would use a sophisticated model to map
-        # task requirements to module capabilities.
-        
-        if "analyze code" in task_prompt.lower():
-            print("[CausalReasoningCore] Delegating to Abstract Symbology Module...")
-            asm_module = self.system.get_module("ASM")
-            result = asm_module.execute("analyze_code_structure('provided_code')")
-        
-        elif "forecast" in task_prompt.lower():
-            print("[CausalReasoningCore] Delegating to Predictive Simulation Engine...")
-            pse_module = self.system.get_module("PSE")
-            result = pse_module.execute("run_simulation(market_data, 10_years)")
+        # Simple keyword extraction from the prompt
+        task_keywords = [word.strip(",.!?") for word in task_prompt.lower().split() if len(word) > 3]
 
+        # Capability-Based Routing
+        chosen_module = self.find_best_module(task_keywords)
+
+        if chosen_module:
+            log("CausalReasoningCore", f"Best match found. Delegating to '{chosen_module.name}'.")
+            self.system.metacognitive_layer.analyze_task_delegation(task_prompt, chosen_module)
+            result = chosen_module.execute(task_prompt)
         else:
-            print("[CausalReasoningCore] Task requires general knowledge. Querying all modules.")
-            result = "Synthesized result from multiple modules."
+            log("CausalReasoningCore", "No specialized module found. Using general reasoning.")
+            result = "Synthesized result from general knowledge base."
 
-        print(f"[CausalReasoningCore] Task complete. Final result: '{result}'")
+        log("CausalReasoningCore", f"Task complete. Final result: '{result}'")
+        self.current_load = 0.0
         return result
 
-class SpecializedCognitiveModule:
-    """
-    Base class for all expert modules (SCMs).
-    """
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
-        print(f"  - SCM Loaded: {self.name} ({self.description})")
-
-    def execute(self, sub_task):
-        """
-        Placeholder for the module's primary function. Each module
-        would override this with its specialized logic.
-        """
-        print(f"    [{self.name}] Executing sub-task: {sub_task}")
-        # Simulate work being done
-        time.sleep(1)
-        return f"Result from {self.name}"
 
 class Chimera:
-    """
-    The main class that orchestrates the entire AI system.
-    """
+    """The main class that orchestrates the entire AI system."""
     def __init__(self):
-        print("--- Project Chimera Initializing ---")
+        log("Chimera", "--- Project Chimera Initializing ---", header=True)
         self.modules = {}
         self.core = CausalReasoningCore(self)
         self.metacognitive_layer = MetacognitiveLayer(self)
         self._load_initial_modules()
-        print("--- System Online. Ready for interaction. ---\n")
+        log("Chimera", "--- System Online. Ready for interaction. ---\n", header=True)
 
     def _load_initial_modules(self):
         """Loads the default set of Specialized Cognitive Modules."""
-        print("[Chimera] Loading initial SCMs...")
-        self.add_module(SpecializedCognitiveModule("SFE", "Sensory Fusion Engine"))
-        self.add_module(SpecializedCognitiveModule("ASM", "Abstract Symbology Module"))
-        self.add_module(SpecializedCognitiveModule("PSE", "Predictive Simulation Engine"))
-        self.add_module(SpecializedCognitiveModule("CSM", "Creative Synthesis Module"))
+        log("Chimera", "Loading initial SCMs...")
+        self.add_module(SensoryFusionEngine())
+        self.add_module(AbstractSymbologyModule())
+        self.add_module(PredictiveSimulationEngine())
+        self.add_module(CreativeSynthesisModule())
 
     def add_module(self, module_instance):
         """Adds a new module to the system."""
@@ -125,13 +112,3 @@ class Chimera:
     def task(self, prompt):
         """The primary interface for giving Chimera a task."""
         self.core.process_task(prompt)
-
-# --- Example Usage ---
-if __name__ == "__main__":
-    # Initialize the Chimera AI system
-    chimera_ai = Chimera()
-
-    # Give it a series of tasks
-    chimera_ai.task("Analyze code for security vulnerabilities.")
-    chimera_ai.task("Forecast the impact of quantum computing on the stock market.")
-    chimera_ai.task("Generate a novel visual concept for a city on Mars.")
