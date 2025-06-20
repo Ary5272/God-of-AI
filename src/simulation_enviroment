@@ -1,0 +1,96 @@
+# src/simulation_environment.py
+# A conceptual framework for the "Digital Crucible" simulation environment.
+# Project Chimera would be trained within a far more advanced version of this.
+
+import random
+
+class PhysicsEngine:
+    """
+    A simplified physics engine for the simulation.
+    In a real scenario, this would be a high-fidelity engine like
+    NVIDIA's PhysX or a custom-built quantum mechanical simulator.
+    """
+    def __init__(self):
+        self.gravity = -9.81  # m/s^2
+
+    def apply_force(self, obj, force):
+        """Applies a force to an object."""
+        # F = ma -> a = F/m
+        acceleration = force / obj.mass
+        obj.velocity += acceleration
+        print(f"[PhysicsEngine] Applied force to '{obj.name}'. New velocity: {obj.velocity:.2f} m/s")
+
+    def update_position(self, obj):
+        """Updates an object's position based on its velocity."""
+        obj.position += obj.velocity
+        print(f"[PhysicsEngine] Updated position for '{obj.name}'. Current position: {obj.position:.2f} m")
+
+class SimulatedObject:
+    """Represents a generic object within the simulation."""
+    def __init__(self, name, mass, initial_position=0, initial_velocity=0):
+        self.name = name
+        self.mass = mass
+        self.position = initial_position
+        self.velocity = initial_velocity
+        print(f"[SimulatedObject] Created '{self.name}' with mass {self.mass}kg.")
+
+class Environment:
+    """
+    The main simulation environment class. Chimera would interact with this
+    world to learn cause and effect.
+    """
+    def __init__(self):
+        print("\n--- Digital Crucible Environment Initializing ---")
+        self.physics = PhysicsEngine()
+        self.objects = []
+        self.time_step = 0
+        print("--- Environment Ready ---")
+
+    def add_object(self, obj):
+        """Adds an object to the simulation."""
+        self.objects.append(obj)
+
+    def run_step(self, chimera_action=None):
+        """Runs a single step of the simulation."""
+        self.time_step += 1
+        print(f"\n--- Simulation Step {self.time_step} ---")
+        
+        if chimera_action:
+            target_obj_name = chimera_action.get("target")
+            force_to_apply = chimera_action.get("force")
+            target = next((obj for obj in self.objects if obj.name == target_obj_name), None)
+
+            if target and force_to_apply:
+                print(f"[Chimera Action] AI attempts to apply {force_to_apply}N of force to '{target.name}'.")
+                self.physics.apply_force(target, force_to_apply)
+
+        # Update all objects
+        for obj in self.objects:
+            # Apply gravity
+            gravity_force = self.physics.gravity * obj.mass
+            self.physics.apply_force(obj, gravity_force)
+            self.physics.update_position(obj)
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    # Create the environment
+    sim_world = Environment()
+
+    # Create objects to populate the world
+    boulder = SimulatedObject("Boulder", mass=500, initial_position=100)
+    feather = SimulatedObject("Feather", mass=0.1, initial_position=100)
+    
+    sim_world.add_object(boulder)
+    sim_world.add_object(feather)
+
+    # Run a few steps without AI intervention
+    sim_world.run_step()
+    sim_world.run_step()
+
+    # Now, the AI decides to interact with the world
+    # This is how Chimera would learn that pushing a feather is easier than a boulder.
+    ai_action = {
+        "target": "Feather",
+        "force": 10  # Apply 10 Newtons of force
+    }
+    sim_world.run_step(chimera_action=ai_action)
