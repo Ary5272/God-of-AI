@@ -11,34 +11,89 @@ Project Chimera is a conceptual framework for a next-generation artificial intel
 Chimera is not a monolithic neural network. It is a dynamic, modular framework inspired by the functional specialization of the human brain. It consists of a central reasoning core surrounded by specialized, interconnected modules that can be activated, reconfigured, and even self-generated as needed.
 
 ### A. The Causal Reasoning Core (CRC)
-The heart of Chimera. Unlike standard LLMs that excel at statistical pattern matching, the CRC is built to understand causality—the relationship between cause and effect. It serves as the system's "consciousness," handling high-level reasoning, strategic planning, ethical deliberation, and task delegation to the appropriate modules.
+The heart of Chimera. The CRC acts as the system's "consciousness," handling high-level reasoning and strategic planning. It now features a **Capability-Based Routing** system. Instead of hard-coded logic, the CRC queries its connected modules to discover which one is best suited for a given task based on the keywords and capabilities they report.
 
 ### B. Specialized Cognitive Modules (SCMs)
-These are expert "sub-brains" that plug into the CRC. They are hyper-efficient and trained for specific tasks. Key modules include:
-- **Sensory Fusion Engine (SFE):** Processes and integrates vast, real-time data streams (video, audio, text, satellite imagery, sensor data).
-- **Abstract Symbology Module (ASM):** The master of logic and language. Deeply understands mathematics, formal logic, and computer code.
-- **Predictive Simulation Engine (PSE):** Creates high-fidelity "what-if" scenarios to find the most probable outcomes of complex situations.
-- **Creative Synthesis Module (CSM):** Generates novel ideas, artistic concepts, engineering designs, and scientific hypotheses.
+These are expert "sub-brains" that plug into the CRC. Each SCM now reports a list of its core capabilities (e.g., `'code_analysis'`, `'data_ingestion'`, `'simulation'`) to the CRC. Key modules include:
+- **Sensory Fusion Engine (SFE):** Processes and integrates vast, real-time data streams.
+- **Abstract Symbology Module (ASM):** The master of logic, mathematics, and computer code.
+- **Predictive Simulation Engine (PSE):** Creates high-fidelity "what-if" scenarios.
+- **Creative Synthesis Module (CSM):** Generates novel ideas, artistic concepts, and scientific hypotheses.
 
 ### C. The Metacognitive Layer
-The masterstroke of the design. This layer is a separate neural network whose only job is to **monitor the performance of the entire Chimera system.** It analyzes efficiency, identifies bottlenecks, and has the authority to reconfigure the architecture, spawning new modules or optimizing data flow. Chimera doesn't just learn; it learns *how to learn better*.
+The "overseer" layer that monitors the performance of the entire Chimera system. It analyzes the CRC's routing decisions and the SCMs' performance to identify bottlenecks and opportunities for optimization, including the creation of new SCMs.
 
 ---
 
-## 3. Training Methodology: The Digital Crucible
+## 3. Repository Structure
 
-Training is a multi-stage process designed to build true understanding, not just mimicry.
-1.  **Phase 1: Foundational Knowledge:** Bootstrapping on a curated dataset of all human knowledge.
-2.  **Phase 2: Simulated Reality Immersion:** Learning cause-and-effect firsthand by interacting with a physically accurate, complex simulated world.
-3.  **Phase 3: Real-Time Symbiotic Learning:** Interacting with live, real-world data streams, augmented by a **Human Expert Feedback Loop (HEFL)** for ethically complex or ambiguous situations.
-4.  **Phase 4: Autodidacticism (Self-Teaching):** The Metacognitive Layer identifies gaps in Chimera's own understanding and automatically generates its own training problems and research goals to fill those gaps.
+.
+├── config.py                 # System-wide configuration settings
+├── main.py                   # Main entry point to run the Chimera AI
+├── README.md                 # This file
+└── src/
+├── chimera_core.py       # The core Chimera, CRC, and Metacognitive classes
+├── simulation_environment.py # The "Digital Crucible" for training
+├── modules/              # Directory for SCM implementations
+│   ├── init.py
+│   ├── base_module.py    # Base class for all SCMs
+│   ├── asm.py            # Abstract Symbology Module
+│   ├── csm.py            # Creative Synthesis Module (placeholder)
+│   ├── pse.py            # Predictive Simulation Engine (placeholder)
+│   └── sfe.py            # Sensory Fusion Engine
+└── utils/                # Directory for utility functions
+├── init.py
+└── logger.py         # Centralized logging system
+
 
 ---
+## 4. How to Run
 
-## 4. Source Code
+1.  Ensure you have the required (conceptual) dependencies.
+2.  Run the main entry point:
+    ```bash
+    python main.py
+    ```
 
-The initial architectural code can be found in the `/src` directory.
-- `chimera_core.py`: Defines the primary classes for the Chimera framework, including the CRC and SCM base classes.
-- `simulation_environment.py`: Lays the groundwork for the simulated reality in which Chimera can be trained.
+***
 
-This repository represents the first step towards a new paradigm of artificial intelligence.
+### `main.py`
+
+Copy the code below for the `main.py` file.
+
+```python
+# main.py
+# The primary entry point for initializing and interacting with the Project Chimera AI.
+
+from src.chimera_core import Chimera
+
+def run_demonstration():
+    """
+    Initializes the Chimera system and runs a series of demonstration tasks
+    to showcase its new capability-based routing.
+    """
+    # Initialize the Chimera AI system
+    chimera_ai = Chimera()
+
+    # --- Task Demonstration ---
+    
+    # Task 1: The CRC will identify the 'code' and 'analysis' keywords
+    # and route this to the ASM based on its reported capabilities.
+    chimera_ai.task("Analyze this Python code snippet for vulnerabilities and suggest optimizations.")
+    
+    # Task 2: The CRC will identify 'satellite' and 'data' and route
+    # this to the SFE.
+    chimera_ai.task("Process real-time satellite imagery and weather data to find correlations.")
+
+    # Task 3: The CRC will find the 'simulation' capability in the PSE.
+    chimera_ai.task("Run a market forecast simulation based on new trade policies.")
+
+    # Task 4: The CRC will find the 'creative' capability in the CSM.
+    chimera_ai.task("Generate three novel concepts for a story about AI.")
+
+    # Task 5: A complex task the CRC will realize requires multiple modules.
+    chimera_ai.task("Analyze this scientific paper, run a simulation of its findings, and generate a creative visualization of the results.")
+
+
+if __name__ == "__main__":
+    run_demonstration()
